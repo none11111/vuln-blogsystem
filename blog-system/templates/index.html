@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block title %}首页 - TechBlog{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h2>最新内容</h2>
+        <p class="total">共 {{ total }} 条内容</p>
+    </div>
+
+    <!-- 媒体类型筛选 -->
+    <div class="media-filter">
+        <div class="filter-title">内容类型</div>
+        <div class="filter-buttons">
+            <a href="{{ url_for('index', media='all') }}" class="filter-btn {% if media_filter == 'all' %}active{% endif %}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                全部
+            </a>
+            <a href="{{ url_for('index', media='text') }}" class="filter-btn {% if media_filter == 'text' %}active{% endif %}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+                文章
+            </a>
+            <a href="{{ url_for('index', media='image') }}" class="filter-btn {% if media_filter == 'image' %}active{% endif %}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                图片
+            </a>
+            <a href="{{ url_for('index', media='video') }}" class="filter-btn {% if media_filter == 'video' %}active{% endif %}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                </svg>
+                视频
+            </a>
+            <a href="{{ url_for('index', media='audio') }}" class="filter-btn {% if media_filter == 'audio' %}active{% endif %}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18V5l12-2v13"></path>
+                    <circle cx="6" cy="18" r="3"></circle>
+                    <circle cx="18" cy="16" r="3"></circle>
+                </svg>
+                音频
+            </a>
+        </div>
+    </div>
+    
+    <div id="posts" class="posts">
+        {% if posts %}
+            {% for post in posts %}
+                <article class="post-card post-{{ post['media_type'] if post['media_type'] else 'text' }}">
+                    <!-- 媒体预览区 -->
+                    {% if post['media_type'] == 'image' and post['media_url'] %}
+                        <div class="post-media">
+                            <a href="{{ url_for('post_detail', post_id=post['id']) }}">
+                                <img src="{{ post['media_url'] }}" alt="{{ post['title'] }}" class="post-image">
+                            </a>
+                        </div>
+                    {% elif post['media_type'] == 'video' and post['media_url'] %}
+                        <div class="post-media">
+                            <a href="{{ url_for('post_detail', post_id=post['id']) }}" class="video-thumbnail">
+                                <div class="play-overlay">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="white">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                </div>
+                                <img src="{{ post['media_thumbnail'] if post['media_thumbnail'] else '/static/img/video-placeholder.png' }}" alt="{{ post['title'] }}" class="post-video-thumb">
+                            </a>
+                        </div>
+                    {% elif post['media_type'] == 'audio' and post['media_url'] %}
+                        <div class="post-media audio-media">
+                            <div class="audio-preview">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 18V5l12-2v13"></path>
+                                    <circle cx="6" cy="18" r="3"></circle>
+                                    <circle cx="18" cy="16" r="3"></circle>
+                                </svg>
+                                <span>音频内容</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="post-content">
+                        <header>
+                            <div class="post-header-top">
+                                <h3><a href="{{ url_for('post_detail', post_id=post['id']) }}">{{ post['title'] }}</a></h3>
+                                <span class="media-badge media-badge-{{ post['media_type'] if post['media_type'] else 'text' }}">
+                                    {% if post['media_type'] == 'image' %}
+                                        图片
+                                    {% elif post['media_type'] == 'video' %}
+                                        视频
+                                    {% elif post['media_type'] == 'audio' %}
+                                        音频
+                                    {% else %}
+                                        文章
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </header>
+                        <div class="meta">
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                {{ post['username'] }}
+                            </span>
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                {{ post['created_at'] }}
+                            </span>
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                {{ post['read_time'] if post['read_time'] else 3 }} 分钟
+                            </span>
+                        </div>
+                        <p class="content-preview">{{ post['content'][:150] }}{% if post['content']|length > 150 %}...{% endif %}</p>
+                        
+                        {% if post['tags'] %}
+                            <div class="post-tags">
+                                {% for tag in post['tags'].split(',')[:3] %}
+                                    <span class="post-tag">{{ tag.strip() }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        {% if is_logged_in and session['user_id'] == post['author_id'] %}
+                            <div class="actions">
+                                <a href="{{ url_for('edit_post', post_id=post['id']) }}" class="btn-edit">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                    编辑
+                                </a>
+                                <form action="{{ url_for('delete_post', post_id=post['id']) }}" method="post" class="inline-form">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                    <button type="submit" class="btn-delete" onclick="return confirm('确定删除这篇内容吗？')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M3 6h18"></path>
+                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                        </svg>
+                                        删除
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
+                </article>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📝</div>
+                <h3>暂无内容</h3>
+                <p>成为第一个分享的人吧！</p>
+                <a href="{{ url_for('new_post') }}" class="empty-action">发布内容</a>
+            </div>
+        {% endif %}
+    </div>
+    
+    {% if total_pages > 1 %}
+        <div class="pagination">
+            {% if page > 1 %}
+                <a href="{{ url_for('index', page=page-1, media=media_filter) }}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    上一页
+                </a>
+            {% endif %}
+            
+            {% for p in range(1, total_pages + 1) %}
+                {% if p == page %}
+                    <span class="current">{{ p }}</span>
+                {% elif p <= 3 or p > total_pages - 3 or (p >= page - 1 and p <= page + 1) %}
+                    <a href="{{ url_for('index', page=p, media=media_filter) }}">{{ p }}</a>
+                {% elif p == 4 or p == total_pages - 3 %}
+                    <span>...</span>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page < total_pages %}
+                <a href="{{ url_for('index', page=page+1, media=media_filter) }}">
+                    下一页
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <!-- 分类和标签区域 -->
+    <div class="bottom-section">
+        <div class="category-section">
+            <h3 class="section-title">文章分类</h3>
+            <ul class="category-list">
+                <li><a href="#" class="category-item active">全部</a></li>
+                <li><a href="#" class="category-item">前端开发</a></li>
+                <li><a href="#" class="category-item">后端技术</a></li>
+                <li><a href="#" class="category-item">数据库</a></li>
+                <li><a href="#" class="category-item">算法</a></li>
+                <li><a href="#" class="category-item">安全</a></li>
+            </ul>
+        </div>
+        <div class="tags-section">
+            <h3 class="section-title">热门标签</h3>
+            <div class="tags-cloud">
+                <span class="tag">Python</span>
+                <span class="tag">Flask</span>
+                <span class="tag">JavaScript</span>
+                <span class="tag">SQLite</span>
+                <span class="tag">安全</span>
+                <span class="tag">Web</span>
+                <span class="tag">API</span>
+                <span class="tag">DevOps</span>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>400 - 请求错误</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><a href="{{ url_for('index') }}">个人博客</a></h1>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('index') }}">首页</a></li>
+                    {% if is_logged_in %}
+                        <li><a href="{{ url_for('profile') }}">用户中心</a></li>
+                        <li><a href="{{ url_for('new_post') }}">写文章</a></li>
+                        <li><a href="{{ url_for('logout') }}">退出</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('login') }}">登录</a></li>
+                        <li><a href="{{ url_for('register') }}">注册</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="container">
+        <div class="error-page">
+            <h1>400</h1>
+            <h2>请求错误</h2>
+            <p>{{ message or '抱歉，您的请求格式不正确。' }}</p>
+            <a href="{{ url_for('index') }}" class="btn">返回首页</a>
+        </div>
+    </main>
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 个人博客系统</p>
+        </div>
+    </footer>
+</body>
+</html>

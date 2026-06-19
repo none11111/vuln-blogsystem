@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post['title'] }} - TechBlog{% endblock %}
+
+{% block content %}
+    <article class="full-post multimodal-post">
+        <header>
+            <div class="post-header-info">
+                <span class="media-badge media-badge-{{ post['media_type'] if post['media_type'] else 'text' }}">
+                    {% if post['media_type'] == 'image' %}
+                        图片
+                    {% elif post['media_type'] == 'video' %}
+                        视频
+                    {% elif post['media_type'] == 'audio' %}
+                        音频
+                    {% else %}
+                        文章
+                    {% endif %}
+                </span>
+                <h2>{{ post['title'] }}</h2>
+            </div>
+            <div class="meta">
+                <span class="meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    {{ post['username'] }}
+                </span>
+                <span class="meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    {{ post['created_at'] }}
+                </span>
+                {% if post['read_time'] %}
+                <span class="meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    {{ post['read_time'] }} 分钟阅读
+                </span>
+                {% endif %}
+                {% if post['category'] %}
+                <span class="meta-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    {{ post['category'] }}
+                </span>
+                {% endif %}
+            </div>
+        </header>
+        
+        <!-- 媒体内容展示 -->
+        {% if post['media_type'] == 'image' and post['media_url'] %}
+            <div class="post-media-full">
+                <img src="{{ post['media_url'] }}" alt="{{ post['title'] }}">
+            </div>
+        {% elif post['media_type'] == 'video' and post['media_url'] %}
+            <div class="post-media-full">
+                <video controls>
+                    <source src="{{ post['media_url'] }}">
+                    您的浏览器不支持视频播放
+                </video>
+            </div>
+        {% elif post['media_type'] == 'audio' and post['media_url'] %}
+            <div class="post-media-full audio-player">
+                <div class="audio-cover">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18V5l12-2v13"></path>
+                        <circle cx="6" cy="18" r="3"></circle>
+                        <circle cx="18" cy="16" r="3"></circle>
+                    </svg>
+                </div>
+                <audio controls>
+                    <source src="{{ post['media_url'] }}">
+                    您的浏览器不支持音频播放
+                </audio>
+            </div>
+        {% endif %}
+        
+        <div class="content">
+            {{ post['content'] }}
+        </div>
+        
+        {% if post['tags'] %}
+            <div class="post-tags-full">
+                {% for tag in post['tags'].split(',') %}
+                    <span class="post-tag">{{ tag.strip() }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% if is_logged_in and session['user_id'] == post['author_id'] %}
+            <div class="post-actions">
+                <a href="{{ url_for('edit_post', post_id=post['id']) }}" class="btn-edit">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    编辑
+                </a>
+                <form action="{{ url_for('delete_post', post_id=post['id']) }}" method="post" class="inline-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button type="submit" class="btn-delete" onclick="return confirm('确定删除这篇内容吗？')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18"></path>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        </svg>
+                        删除
+                    </button>
+                </form>
+            </div>
+        {% endif %}
+        
+        <div class="back-link">
+            <a href="{{ url_for('index') }}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                返回首页
+            </a>
+        </div>
+    </article>
+    
+    <style>
+        .multimodal-post {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+        }
+        
+        .multimodal-post header {
+            margin-bottom: 32px;
+        }
+        
+        .post-header-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .multimodal-post h2 {
+            border: none;
+            margin: 0;
+            padding: 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .multimodal-post .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        
+        .multimodal-post .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .post-media-full {
+            margin-bottom: 32px;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: var(--bg-tertiary);
+        }
+        
+        .post-media-full img,
+        .post-media-full video {
+            width: 100%;
+            max-height: 600px;
+            object-fit: contain;
+            display: block;
+        }
+        
+        .audio-player {
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .audio-cover {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-dark);
+        }
+        
+        .audio-player audio {
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .multimodal-post .content {
+            font-size: 16px;
+            line-height: 1.9;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            margin-bottom: 24px;
+        }
+        
+        .post-tags-full {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .post-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .post-actions .btn-edit,
+        .post-actions .btn-delete {
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition-fast);
+        }
+        
+        .post-actions .btn-edit {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .post-actions .btn-edit:hover {
+            background: var(--primary-dark);
+        }
+        
+        .post-actions .btn-delete {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .post-actions .btn-delete:hover {
+            background: #dc2626;
+        }
+        
+        .back-link {
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .back-link a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: var(--transition-fast);
+        }
+        
+        .back-link a:hover {
+            color: var(--primary-dark);
+        }
+    </style>
+{% endblock %}

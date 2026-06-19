@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}搜索结果 - 个人博客{% endblock %}
+
+{% block content %}
+    <h2>搜索结果</h2>
+    <p class="search-info">关键词: <strong>"{{ keyword }}"</strong>，共找到 {{ total }} 篇文章</p>
+    
+    {% if posts %}
+        <div class="posts">
+            {% for post in posts %}
+                <article>
+                    <h3><a href="{{ url_for('post_detail', post_id=post['id']) }}">{{ post['title'] }}</a></h3>
+                    <p class="meta">作者: {{ post['username'] }} | {{ post['created_at'] }}</p>
+                    <p class="content-preview">{{ post['content'][:200] }}{% if post['content']|length > 200 %}...{% endif %}</p>
+                </article>
+            {% endfor %}
+        </div>
+        
+        {% if total_pages > 1 %}
+            <div class="pagination">
+                {% if page > 1 %}
+                    <a href="{{ url_for('search', q=keyword, page=page-1) }}">&laquo; 上一页</a>
+                {% endif %}
+                
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page %}
+                        <span class="current">{{ p }}</span>
+                    {% elif p <= 3 or p > total_pages - 3 or (p >= page - 1 and p <= page + 1) %}
+                        <a href="{{ url_for('search', q=keyword, page=p) }}">{{ p }}</a>
+                    {% elif p == 4 or p == total_pages - 3 %}
+                        <span>...</span>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page < total_pages %}
+                    <a href="{{ url_for('search', q=keyword, page=page+1) }}">下一页 &raquo;</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <p>没有找到相关文章，请尝试其他关键词。</p>
+    {% endif %}
+    
+    <p><a href="{{ url_for('index') }}">返回首页</a></p>
+{% endblock %}

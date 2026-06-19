@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}用户中心 - 个人博客{% endblock %}
+
+{% block content %}
+    <h2>用户中心</h2>
+    <div class="profile-info">
+        <h3>个人信息</h3>
+        <p><strong>用户名:</strong> {{ user['username'] }}</p>
+        <p><strong>注册时间:</strong> {{ user['created_at'] }}</p>
+        <p><strong>文章数量:</strong> {{ posts_count }}</p>
+    </div>
+    
+    <div class="recent-posts">
+        <h3>我的文章</h3>
+        {% if recent_posts %}
+            <ul>
+                {% for post in recent_posts %}
+                    <li>
+                        <a href="{{ url_for('post_detail', post_id=post['id']) }}">{{ post['title'] }}</a>
+                        <span class="date">{{ post['created_at'] }}</span>
+                        <a href="{{ url_for('edit_post', post_id=post['id']) }}">编辑</a>
+                    </li>
+                {% endfor %}
+            </ul>
+            <p><a href="{{ url_for('index') }}">查看全部文章</a></p>
+        {% else %}
+            <p>暂无文章，<a href="{{ url_for('new_post') }}">写第一篇文章</a>吧！</p>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}审核面板{% endblock %}
+
+{% block content %}
+<div class="review-container">
+    <div class="page-header">
+        <h1>内容审核面板</h1>
+        <p>管理和审核用户提交的内容</p>
+    </div>
+    
+    <div class="stats-cards">
+        <div class="stat-card pending">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-info">
+                <div class="stat-value">{{ pending_count }}</div>
+                <div class="stat-label">待审核</div>
+            </div>
+        </div>
+        <div class="stat-card approved">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+                <div class="stat-value">{{ approved_count }}</div>
+                <div class="stat-label">已通过</div>
+            </div>
+        </div>
+        <div class="stat-card rejected">
+            <div class="stat-icon">❌</div>
+            <div class="stat-info">
+                <div class="stat-value">{{ rejected_count }}</div>
+                <div class="stat-label">已拒绝</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="review-section">
+        <h2>待审核内容</h2>
+        
+        {% if pending_posts %}
+        <div class="post-list">
+            {% for post in pending_posts %}
+            <div class="post-card">
+                <div class="post-header">
+                    <h3><a href="{{ url_for('review_post', post_id=post['id']) }}">{{ post['title'] }}</a></h3>
+                    <span class="post-status pending">待审核</span>
+                </div>
+                <p class="post-excerpt">{{ post['content'][:100] }}...</p>
+                <div class="post-meta">
+                    <span class="author">作者: {{ post['username'] }}</span>
+                    <span class="date">{{ post['created_at'] }}</span>
+                    {% if post['media_type'] != 'text' %}
+                    <span class="media-type">{{ post['media_type'] }}</span>
+                    {% endif %}
+                </div>
+                <div class="review-actions">
+                    <form action="{{ url_for('approve_post', post_id=post['id']) }}" method="post" class="inline-form">
+                        <input type="hidden" name="csrf_token" value="abc123">
+                        <button type="submit" class="btn btn-approve">通过</button>
+                    </form>
+                    <form action="{{ url_for('reject_post', post_id=post['id']) }}" method="post" class="inline-form">
+                        <input type="hidden" name="csrf_token" value="abc123">
+                        <button type="submit" class="btn btn-reject">拒绝</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🎉</div>
+            <p>暂无待审核内容</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
